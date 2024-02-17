@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org/">
+  <head
+    th:replace="/fragments/head  :: head(title='Veterinaria', css='css/style.css', icono='img/icon.avif')"
+  ></head>
+  <body>
+    <!--Barra de navegación-->
+
+    <nav th:replace="/fragments/navbar :: nav(logo='/img/logo.png')"></nav>
+
+    <!-- Cuadro de busqueda -->
+
+    <div class="d-flex justify-content-center busqueda p-4">
+      <input
+        id="input"
+        class="form-control input"
+        type="search"
+        placeholder="Ingrese Producto"
+        aria-label="Search"
+        name="buscar"
+      />
+    </div>
+
+    <!--Boton Nuevo-->
+
+    <div class="mt-1 mb-4" sec:authorize="hasAnyRole('ROLE_LEO')">
+      <div class="container d-flex justify-content-evenly p-3">
+        <a
+          class="d-flex btn nuevo"
+          data-bs-toggle="modal"
+          data-bs-target="#registroModalNuevo"
+          href="#"
+          ><svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="icon icon-tabler icon-tabler-plus"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            stroke-width="2"
+            stroke="currentColor"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M12 5l0 14" />
+            <path d="M5 12l14 0" /></svg
+          ><span>Nuevo</span></a
+        >
+        <!-------------Modal del link "Nuevo"------------->
+        <div
+          class="modal fade w-100"
+          id="registroModalNuevo"
+          tabindex="-1"
+          role="dialog"
+          aria-labelledby="registroModalLabel"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="registroModalNuevo">
+                  Nuevo Producto
+                </h5>
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                ></button>
+              </div>
+              <!------------- Formulario en el modal ------------->
+              <div class="modal-body">
+                <div class="container">
+                  <form
+                    th:action="@{/productos/agregar}"
+                    class="custom-form"
+                    method="POST"
+                    enctype="multipart/form-data"
+                  >
+                    <input hidden value="" name="id" />
+                    <div class="mb-3">
+                      <label for="nombre" class="form-label">Producto</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        name="nombre"
+                        value=""
+                        placeholder="Ingrese nombre de producto"
+                        required
+                      />
+                    </div>
+                    <div class="mb-3">
+                      <label for="" class="form-label"> Stock </label>
+                      <input
+                        type="number"
+                        class="form-control w-25"
+                        name="stock"
+                        value="0"
+                      />
+                    </div>
+                    <div class="mb-3">
+                      <label for="" class="form-label">Precio</label>
+                      <div class="d-flex precio">
+                        <label for="">$</label>
+                        <input
+                          type="number"
+                          class="form-control w-50"
+                          name="precio"
+                          value=""
+                        />
+                      </div>
+                    </div>
+
+                    <div class="modal-footer">
+                      <button
+                        type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal"
+                      >
+                        Cerrar
+                      </button>
+                      <button type="submit" class="btn btn-success">
+                        Agregar
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!--Tabla de los productos-->
+
+    <div class="d-flex justify-content-center">
+      <div class="w-75">
+        <div class="container">
+          <table class="table table">
+            <thead class="encabezado">
+              <tr>
+                <th scope="col">Producto</th>
+                <th scope="col">Stock</th>
+                <th scope="col">Precio</th>
+                <th scope="col">Acciones</th>
+              </tr>
+            </thead>
+            <tbody class="productos">
+              <div
+                th:if="${productos != null}"
+                th:each="producto : ${productos}"
+              >
+                <tr class="fila">
+                  <td>
+                    <a
+                      th:if="${session.usuariosession.rol.toString()} == 'LEO'"
+                      class=""
+                      data-bs-toggle="modal"
+                      th:data-bs-target="'#registroModal'+${producto.id}"
+                      th:text="${producto.nombre}"
+                      href="#"
+                    ></a>
+                    <!-------------Modal del link "Producto"------------->
+                    <div
+                      class="modal fade w-100"
+                      th:id="'registroModal'+${producto.id}"
+                      tabindex="-1"
+                      role="dialog"
+                      aria-labelledby="registroModalLabel"
+                      aria-hidden="true"
+                    >
+                      <div
+                        class="modal-dialog modal-dialog-centered"
+                        role="document"
+                      >
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5
+                              class="modal-title"
+                              th:text="${producto.nombre}"
+                            ></h5>
+                            <button
+                              type="button"
+                              class="btn-close"
+                              data-bs-dismiss="modal"
+                              aria-label="Close"
+                            ></button>
+                          </div>
+                          <!------------- Formulario en el modal ------------->
+                          <div class="modal-body">
+                            <div class="container">
+                              <form
+                                class="custom-form"
+                                method="POST"
+                                th:action="@{/productos/modificar/__${producto.id}__}"
+                              >
+                                <input
+                                  hidden
+                                  th:value="${producto.id}"
+                                  name="id"
+                                />
+                                <div class="mb-3">
+                                  <label for="nombre" class="form-label"
+                                    >Producto</label
+                                  >
+                                  <input
+                                    type="text"
+                                    class="form-control"
+                                    th:value="${producto.nombre}"
+                                    name="nombre"
+                                    placeholder="Ingrese nombre de producto"
+                                    required
+                                  />
+                                </div>
+                                <div class="mb-3">
+                                  <label for="nombre" class="form-label"
+                                    >Stock</label
+                                  >
+                                  <input
+                                    type="number"
+                                    class="form-control w-25"
+                                    name="stock"
+                                    th:value="${producto.stock}"
+                                    required
+                                  />
+                                </div>
+                                <hr />
+
+                                <!-- Precio -->
+
+                                <div class="mb-3">
+                                  <label for="" class="form-label precio">
+                                    Precio
+                                  </label>
+                                </div>
+                                <div class="w-100 d-flex">
+                                  <!-- Modificar importe -->
+                                  <div class="w-50">
+                                    <div class="mb-3">
+                                      <label for="" class="form-label w-100">
+                                        Aplicar porcentaje
+                                      </label>
+                                      <div class="d-flex porcentaje">
+                                        <input
+                                          class="precioactual"
+                                          hidden
+                                          th:value="${producto.precio}"
+                                        />
+                                        <input
+                                          name="porcentaje"
+                                          type="number"
+                                          class="% form-control w-50"
+                                          value="0"
+                                        />
+                                        <label for="" class="f-bold">%</label>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <!-- Importe total -->
+                                  <div
+                                    class="w-50 d-flex justify-content-center align-items-center"
+                                  >
+                                    <div class="mb-3 importefinal">
+                                      <h3 for="" class="w-100">
+                                        Importe Final
+                                      </h3>
+                                      <div
+                                        class="d-flex justify-content-center valorfinal"
+                                      >
+                                        <label for="" class="f-bold">$</label>
+                                        <input
+                                          type="text"
+                                          class="importefinalproducto w-100"
+                                          name="precio"
+                                          th:value="${producto.precio}"
+                                          disabled
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="modal-footer">
+                                  <button
+                                    type="button"
+                                    class="btn btn-secondary"
+                                    data-bs-dismiss="modal"
+                                  >
+                                    Cerrar
+                                  </button>
+                                  <button type="submit" class="btn btn-success">
+                                    Guardar
+                                  </button>
+                                </div>
+                              </form>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <a
+                      th:if="${session.usuariosession.rol.toString()} == 'EMPLEADO'"
+                      class=""
+                      th:text="${producto.nombre}"
+                    ></a>
+                  </td>
+                  <td class="stock" th:text="${producto.stock}"></td>
+                  <td
+                    class="mostrarprecio"
+                    th:value="${producto.precio}"
+                    th:text="'$'+${producto.precio}"
+                  ></td>
+                  <td>
+                    <a
+                      th:if="${producto.stock} != 0"
+                      class="d-flex vender"
+                      data-bs-toggle="modal"
+                      th:data-bs-target="'#registroModalVender'+${producto.id}"
+                      href="#"
+                      ><svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="icon icon-tabler icon-tabler-currency-dollar"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        stroke-width="2"
+                        stroke="currentColor"
+                        fill="none"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <path
+                          d="M16.7 8a3 3 0 0 0 -2.7 -2h-4a3 3 0 0 0 0 6h4a3 3 0 0 1 0 6h-4a3 3 0 0 1 -2.7 -2"
+                        />
+                        <path d="M12 3v3m0 12v3" /></svg
+                      ><span>Vender</span></a
+                    >
+                    <!-------------Modal del link "Vender"------------->
+                    <div
+                      class="modal fade w-100"
+                      tabindex="-1"
+                      role="dialog"
+                      th:id="'registroModalVender'+${producto.id}"
+                      aria-hidden="true"
+                    >
+                      <div
+                        class="modal-dialog modal-dialog-centered"
+                        role="document"
+                      >
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5
+                              class="modal-title"
+                              th:id="'registroModalVender'+${producto.id}"
+                              th:text="${producto.nombre}"
+                            ></h5>
+                            <button
+                              type="button"
+                              class="btn-close"
+                              data-bs-dismiss="modal"
+                              aria-label="Close"
+                            ></button>
+                          </div>
+                          <!------------- Formulario en el modal ------------->
+                          <div class="modal-body">
+                            <div class="container">
+                              <form
+                                class="custom-form"
+                                th:action="@{/vender/__${producto.id}__}"
+                                method="POST"
+                                enctype="multipart/form-data"
+                              >
+                                <input
+                                  hidden
+                                  th:value="${producto.id}"
+                                  name="id"
+                                />
+
+                                <div class="d-flex">
+                                  <!--Etiquetas-->
+
+                                  <div>
+                                    <div class="labelvender">
+                                      <label for="nombre" class="form-label"
+                                        >Cantidad</label
+                                      >
+                                    </div>
+                                    <div class="labelvender">
+                                      <label for="nombre" class="form-label"
+                                        >P. Unitario</label
+                                      >
+                                    </div>
+                                    <div class="labelvender">
+                                      <h3 for="" class="w-100">
+                                        Importe Final
+                                      </h3>
+                                    </div>
+                                  </div>
+
+                                  <!-- Entradas -->
+                                  <div class="inputvender">
+                                    <div class="d-flex stockenter mb-3">
+                                      <input
+                                        type="number"
+                                        class="cantidad form-control w-50"
+                                        name="cantidad"
+                                        value="1"
+                                        min="1"
+                                        th:max="${producto.stock}"
+                                        required
+                                      />
+                                    </div>
+                                    <div class="mb-3">
+                                      <input
+                                        type="number"
+                                        class="preciounitario form-control w-50"
+                                        th:value="${producto.precio}"
+                                        disabled
+                                      />
+                                    </div>
+
+                                    <!-- Importe total -->
+                                    <div
+                                      class="w-75 d-flex justify-content-center align-items-center"
+                                    >
+                                      <div class="mb-3 ventafinal">
+                                        <div
+                                          class="d-flex justify-content-center valorfinal"
+                                        >
+                                          <label for="" class="f-bold">$</label>
+                                          <input
+                                            type="text"
+                                            class="importetotal w-100"
+                                            disabled
+                                          />
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div class="modal-footer">
+                                  <button
+                                    type="button"
+                                    class="btn btn-secondary"
+                                    data-bs-dismiss="modal"
+                                  >
+                                    Cerrar
+                                  </button>
+                                  <button type="submit" class="btn btn-success">
+                                    Guardar
+                                  </button>
+                                </div>
+                              </form>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </div>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <span>Veterinaria</span>
+    </footer>
+    <script src="./js/index.js"></script>
+  </body>
+</html>

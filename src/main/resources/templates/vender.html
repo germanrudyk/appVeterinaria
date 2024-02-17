@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org/">
+  <head
+    th:replace="/fragments/head  :: head(title='Cta Cte', css='../../../css/style.css', icono='../../../img/icon.avif')"
+  ></head>
+  <body>
+    <!--Barra de navegación-->
+
+    <nav
+      th:replace="/fragments/navbar :: nav(logo='../../../img/logo.png')"
+    ></nav>
+
+    <div class="d-flex justify-content-center mb-5 cliente">
+      <h1 th:text="${cliente.nombre}"></h1>
+    </div>
+
+    <!-- Agregar Producto -->
+
+    <div class="d-flex justify-content-left agregar mb-5">
+      <div class="d-flex w-75">
+        <input
+          id="input"
+          class="form-control input"
+          type="search"
+          placeholder="Ingrese Producto"
+          aria-label="Search"
+        />
+      </div>
+    </div>
+    <div class="d-flex justify-content-center contenedorfiltro">
+      <div id="listaproductos"></div>
+    </div>
+
+    <!--Tabla de los productos-->
+
+    <form
+      th:action="@{/clientes/vender/__${cliente.id}__}"
+      class="custom-form"
+      method="POST"
+      enctype="multipart/form-data"
+    >
+      <div class="d-flex justify-content-center">
+        <div class="w-75">
+          <div class="container">
+            <table class="table table">
+              <thead class="encabezado">
+                <tr>
+                  <th scope="col">Producto</th>
+                  <th scope="col">Cantidad</th>
+                  <th scope="col">P. Unitario</th>
+                  <th scope="col">Total</th>
+                </tr>
+              </thead>
+              <tbody id="seleccionados" class="productos"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!--Boton Vender-->
+
+      <div class="mt-5 mb-4">
+        <div class="botones container d-flex justify-content-evenly p-3">
+          <a
+            id="vender"
+            class="btn cancelar"
+            data-bs-toggle="modal"
+            data-bs-target="#registroModalNuevo"
+            href="#"
+            ><span>VENDER</span></a
+          >
+          <!-------------Modal del link "Vender"------------->
+          <div
+            class="modal fade w-100"
+            id="registroModalNuevo"
+            tabindex="-1"
+            role="dialog"
+            aria-labelledby="registroModalLabel"
+            aria-hidden="true"
+          >
+            <div class="modal-dialog modal-dialog-centered" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="registroModalNuevo">Venta</h5>
+                  <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                  ></button>
+                </div>
+                <!------------- Formulario en el modal ------------->
+                <div class="modal-body">
+                  <div class="container">
+                    <input hidden th:value="${cliente.id}" name="idCliente" />
+                    <div class="d-flex mb-3 pago">
+                      <label for="nombre" class="form-label">Pago:</label>
+                      <select name="pago" id="pago">
+                        <option value="total">TOTAL</option>
+                        <option value="ctacte">CTA CTE</option>
+                      </select>
+                    </div>
+                    <div class="d-flex mb-3 total">
+                      <label for="" class="form-label">TOTAL</label>
+                      <label for="">$</label>
+                      <input
+                        type="text"
+                        id="totalventa"
+                        class="form-control w-50"
+                        disabled
+                      />
+                    </div>
+
+                    <div class="modal-footer">
+                      <button
+                        type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal"
+                      >
+                        Cerrar
+                      </button>
+                      <button type="submit" class="btn btn-success">
+                        Aceptar
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+    <footer>
+      <span>Veterinaria</span>
+    </footer>
+    <script th:src="@{../../../js/vender.js}"></script>
+    <script th:inline="javascript">
+      // Obtiene los datos del modelo y los convierte a JSON
+      var todosProductos = /*[[${productos}]]*/ [];
+    </script>
+  </body>
+</html>

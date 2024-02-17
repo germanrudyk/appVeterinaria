@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org/">
+  <head
+    th:replace="/fragments/head  :: head(title='Cta Cte', css='../../../css/style.css', icono='../../../img/icon.avif')"
+  ></head>
+  <body>
+    <!--Barra de navegación-->
+
+    <nav
+      th:replace="/fragments/navbar :: nav(logo='../../../img/logo.png')"
+    ></nav>
+
+    <div class="d-flex justify-content-center mb-5 cliente">
+      <h1 th:text="${cliente.nombre}"></h1>
+    </div>
+
+    <!--Tabla de los productos-->
+
+    <div class="d-flex justify-content-center">
+      <div class="w-75">
+        <div class="container">
+          <table class="table table">
+            <thead class="encabezado">
+              <tr>
+                <th scope="col">Producto</th>
+                <th scope="col">Cantidad</th>
+                <th scope="col">P. Unitario</th>
+                <th scope="col">Total</th>
+                <th scope="col">Total a cancelar</th>
+              </tr>
+            </thead>
+            <tbody>
+              <div th:each="producto : ${productos}">
+                <tr th:if="${producto.montoACancelar} != 0" class="fila">
+                  <td th:text="${producto.producto.nombre}"></td>
+                  <td
+                    th:value="${producto.cantidad}"
+                    th:text="${producto.cantidad}"
+                  ></td>
+                  <td
+                    th:value="${producto.precioUnitario}"
+                    class="preciounitario"
+                    th:text="'$ ' + ${producto.precioUnitario}"
+                  ></td>
+                  <td
+                    th:value="${producto.precioTotal}"
+                    class="preciototal"
+                    th:text="'$ ' + ${producto.precioTotal}"
+                  ></td>
+                  <td
+                    th:value="${producto.montoACancelar}"
+                    class="montoacancelar"
+                    th:text="'$ ' + ${producto.montoACancelar}"
+                  ></td>
+                  <td>
+                    <a
+                      class="d-flex vender align-items-center"
+                      data-bs-toggle="modal"
+                      th:data-bs-target="'#registroModalCancelar'+${producto.id}"
+                      href="#"
+                      ><svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        fill="currentColor"
+                        class="bi bi-bag-check-fill"
+                        viewBox="0 0 16 16"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M10.5 3.5a2.5 2.5 0 0 0-5 0V4h5zm1 0V4H15v10a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V4h3.5v-.5a3.5 3.5 0 1 1 7 0m-.646 5.354a.5.5 0 0 0-.708-.708L7.5 10.793 6.354 9.646a.5.5 0 1 0-.708.708l1.5 1.5a.5.5 0 0 0 .708 0z"
+                        /></svg
+                      ><span class="p-1">Cancelar</span></a
+                    >
+                    <!-------------Modal del link "Cancelar"------------->
+                    <div
+                      class="modal fade w-100"
+                      th:id="'registroModalCancelar'+${producto.id}"
+                      tabindex="-1"
+                      role="dialog"
+                      aria-labelledby="registroModalLabel"
+                      aria-hidden="true"
+                    >
+                      <div
+                        class="modal-dialog modal-dialog-centered"
+                        role="document"
+                      >
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5
+                              class="modal-title"
+                              th:text="${producto.producto.nombre}"
+                            ></h5>
+                            <button
+                              type="button"
+                              class="btn-close"
+                              data-bs-dismiss="modal"
+                              aria-label="Close"
+                            ></button>
+                          </div>
+                          <!------------- Formulario en el modal ------------->
+                          <div class="modal-body">
+                            <div class="container">
+                              <form
+                                th:action="@{/clientes/ctacte/__${cliente.id}__/__${producto.id}__}"
+                                class="custom-form"
+                                method="POST"
+                                enctype="multipart/form-data"
+                              >
+                                <input hidden value="" name="id" />
+                                <div class="mb-3 pago">
+                                  <label for="nombre" class="form-label"
+                                    >Pago:</label
+                                  >
+                                  <select name="pago" class="opcionpago">
+                                    <option value="total">TOTAL</option>
+                                    <option value="parcial">PARCIAL</option>
+                                  </select>
+                                </div>
+                                <!--<div class="d-flex mb-5 monto">
+                                  <label for="" class="form-label"
+                                    >Monto a cancelar: $</label
+                                  >
+                                  <input
+                                    type="number"
+                                    class="form-control w-50"
+                                    name="stock"
+                                    value=""
+                                  /> 
+                                </div> -->
+                                <div class="d-flex mb-3 total">
+                                  <label for="" class="form-label">TOTAL</label>
+                                  <label for="">$</label>
+                                  <input
+                                    type="text"
+                                    class="prectotal form-control w-50"
+                                    disabled
+                                  />
+                                </div>
+
+                                <div class="modal-footer">
+                                  <button
+                                    type="button"
+                                    class="btn btn-secondary"
+                                    data-bs-dismiss="modal"
+                                  >
+                                    Cerrar
+                                  </button>
+                                  <button type="submit" class="btn btn-success">
+                                    Aceptar
+                                  </button>
+                                </div>
+                              </form>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </div>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Importe Total -->
+    <section class="container p-5 d-flex justify-content-center">
+      <div class="importetotal d-flex justify-content-center">
+        <label for="importetotal">TOTAL:</label>
+        <input id="importetotal" type="text" disabled/>
+      </div>
+    </section>
+
+    <!--Boton Cancelar-->
+
+    <div class="mt-5 mb-4">
+      <div class="botones container d-flex justify-content-evenly p-3">
+        <a
+          id="cancelar"
+          class="btn cancelar"
+          data-bs-toggle="modal"
+          data-bs-target="#registroModalNuevo"
+          href="#"
+          >CANCELAR TODO</a
+        >
+        <!-------------Modal del link "Cancelar"------------->
+        <div
+          class="modal fade w-100"
+          id="registroModalNuevo"
+          tabindex="-1"
+          role="dialog"
+          aria-labelledby="registroModalLabel"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="registroModalNuevo">
+                  Cancelación Cuenta Corriente
+                </h5>
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                ></button>
+              </div>
+              <!------------- Formulario en el modal ------------->
+              <div class="modal-body">
+                <div class="container">
+                  <form
+                    th:action="@{/clientes/ctacte/__${cliente.id}__}"
+                    class="custom-form"
+                    method="POST"
+                    enctype="multipart/form-data"
+                  >
+                    <h3 class="p-3">
+                      Deseas cancelar toda la cuenta corriente?
+                    </h3>
+
+                    <div class="modal-footer">
+                      <button
+                        type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal"
+                      >
+                        Cerrar
+                      </button>
+                      <button type="submit" class="btn btn-success">
+                        Aceptar
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <span>Veterinaria</span>
+    </footer>
+    <script src="../../js/ctacte.js"></script>
+  </body>
+</html>
